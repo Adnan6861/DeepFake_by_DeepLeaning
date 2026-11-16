@@ -27,15 +27,6 @@ from schemas import (
     ContactOut,
 )
 
-# Official demo accounts allowed to use evaluator quick-login credentials
-DEMO_EMAILS = {
-    "adnannawazk080@gmail.com",
-    "hadia.noor@forensics.ai",
-    "kainat.zahra@forensics.ai",
-    "kainat.zahra@numl.edu.pk",
-}
-
-
 def hash_password(plain_password: str) -> str:
     """Hash a password using bcrypt (or PBKDF2-HMAC-SHA256 fallback)."""
     if HAS_BCRYPT:
@@ -47,7 +38,7 @@ def hash_password(plain_password: str) -> str:
 
 
 def verify_password(plain_password: str, stored_hash: str) -> bool:
-    """Verify a password against bcrypt, PBKDF2, or legacy seeded hashes."""
+    """Verify a password against bcrypt or PBKDF2 hashes."""
     if not stored_hash:
         return False
     if stored_hash.startswith("$2b$") or stored_hash.startswith("$2a$"):
@@ -62,7 +53,7 @@ def verify_password(plain_password: str, stored_hash: str) -> bool:
             _, salt, digest = parts
             computed = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt.encode("utf-8"), 100_000).hex()
             return hmac.compare_digest(computed, digest)
-    return hmac.compare_digest(stored_hash, plain_password)
+    return False
 
 
 # Ensure database tables exist
@@ -161,22 +152,13 @@ def login_user(payload: UserLogin, db: Session = Depends(get_db)):
     query_email = payload.email.strip().lower()
     user = db.query(User).filter(User.email == query_email).first()
 
-    # Alternate alias support
-    if not user and query_email == "kainat.zahra@numl.edu.pk":
-        user = db.query(User).filter(User.email == "kainat.zahra@forensics.ai").first()
-
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found in PostgreSQL database. Please check your email or Register."
         )
 
-    # Validate password using secure hash verification (demo fallback restricted strictly to official demo accounts)
-    is_demo_account = query_email in DEMO_EMAILS
-    valid = verify_password(payload.password, user.password_hash) or (
-        is_demo_account and payload.password in ["forensics1234", "numl1234"]
-    )
-    if not valid:
+    if not verify_password(payload.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials. Please verify your password."

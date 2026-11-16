@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-3 z-40 w-full px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto transition-all duration-300">
       <div
-        className={`rounded-2xl border backdrop-blur-2xl px-4 sm:px-6 h-16 flex items-center justify-between transition-all duration-300 ${
+        className={`rounded-2xl border backdrop-blur-2xl px-4 sm:px-6 h-[4.5rem] flex items-center justify-between transition-all duration-300 ${
           isScrolled
             ? 'border-indigo-500/30 bg-slate-950/90 shadow-2xl shadow-indigo-950/50 ring-1 ring-indigo-500/20'
             : 'border-white/10 bg-slate-900/85 shadow-2xl shadow-black/60 ring-1 ring-white/5'
@@ -108,12 +108,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Action Controls */}
         <div className="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
           
-          {/* Engine Status Tag (Desktop) */}
-          <div className="hidden xl:flex items-center space-x-2 px-2.5 py-1 rounded-full bg-slate-950/80 border border-emerald-500/30 text-[11px] font-mono text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-semibold text-slate-300">ENGINE v1.4 LIVE</span>
-          </div>
-
           {/* User Auth Section */}
           {currentUser ? (
             <div className="relative" ref={dropdownRef}>

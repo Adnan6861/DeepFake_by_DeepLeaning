@@ -6,6 +6,7 @@ const STORAGE_USERS_KEY = 'deepfake_detective_users_v1';
 const STORAGE_CURRENT_USER_KEY = 'deepfake_detective_current_user_v1';
 const STORAGE_HISTORY_KEY = 'deepfake_detective_history_v1';
 const STORAGE_CONTACT_KEY = 'deepfake_detective_contacts_v1';
+const LEGACY_DEMO_USER_IDS = new Set(['user_adnan', 'user_hadia', 'user_kainat']);
 
 // Deterministic non-plaintext digest for local fallback cache
 function hashPasswordLocal(password: string): string {
@@ -20,47 +21,6 @@ function hashPasswordLocal(password: string): string {
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
   return `hsh_${(h2 >>> 0).toString(16).padStart(8, '0')}${(h1 >>> 0).toString(16).padStart(8, '0')}`;
 }
-
-const DEMO_EMAILS = new Set([
-  'adnannawazk080@gmail.com',
-  'hadia.noor@forensics.ai',
-  'kainat.zahra@forensics.ai',
-  'kainat.zahra@numl.edu.pk',
-]);
-
-// Initial fallback accounts matching project specification
-const INITIAL_USERS: (User & { passwordHash: string })[] = [
-  {
-    id: 'user_adnan',
-    name: 'Muhammad Adnan',
-    email: 'adnannawazk080@gmail.com',
-    role: 'Student',
-    institution: 'Media Forensics & AI Research Center',
-    createdAt: '2026-03-01T10:00:00Z',
-    passwordHash: hashPasswordLocal('numl1234'),
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'user_hadia',
-    name: 'Hadia Noor',
-    email: 'hadia.noor@forensics.ai',
-    role: 'Student',
-    institution: 'Media Forensics & AI Research Center',
-    createdAt: '2026-03-01T10:00:00Z',
-    passwordHash: hashPasswordLocal('numl1234'),
-    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'user_kainat',
-    name: 'Syeda Kainat Zahra',
-    email: 'kainat.zahra@forensics.ai',
-    role: 'Supervisor',
-    institution: 'Department of Software Engineering, Media Forensics Lab',
-    createdAt: '2026-02-15T09:00:00Z',
-    passwordHash: hashPasswordLocal('numl1234'),
-    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-  },
-];
 
 export class DatabaseService {
   /**
@@ -83,12 +43,17 @@ export class DatabaseService {
     try {
       const data = localStorage.getItem(STORAGE_USERS_KEY);
       if (!data) {
-        localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(INITIAL_USERS));
-        return INITIAL_USERS;
+        localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify([]));
+        return [];
       }
-      return JSON.parse(data);
+      const users = JSON.parse(data) as (User & { passwordHash: string })[];
+      const activeUsers = users.filter((user) => !LEGACY_DEMO_USER_IDS.has(user.id));
+      if (activeUsers.length !== users.length) {
+        this.saveUsers(activeUsers);
+      }
+      return activeUsers;
     } catch {
-      return INITIAL_USERS;
+      return [];
     }
   }
 
@@ -101,7 +66,12 @@ export class DatabaseService {
     try {
       const data = localStorage.getItem(STORAGE_CURRENT_USER_KEY);
       if (!data) return null;
-      return JSON.parse(data);
+      const user = JSON.parse(data) as User;
+      if (LEGACY_DEMO_USER_IDS.has(user.id)) {
+        localStorage.removeItem(STORAGE_CURRENT_USER_KEY);
+        return null;
+      }
+      return user;
     } catch {
       return null;
     }
@@ -207,25 +177,14 @@ export class DatabaseService {
     // 2. Local Fallback
     const users = this.getUsers();
     const queryEmail = email.trim().toLowerCase();
-    const user = users.find((u) => {
-      const uEmail = u.email.toLowerCase();
-      return (
-        uEmail === queryEmail ||
-        (queryEmail === 'kainat.zahra@forensics.ai' && uEmail === 'kainat.zahra@numl.edu.pk') ||
-        (queryEmail === 'kainat.zahra@numl.edu.pk' && uEmail === 'kainat.zahra@forensics.ai')
-      );
-    });
+    const user = users.find((u) => u.email.toLowerCase() === queryEmail);
 
     if (!user) {
       return { success: false, error: 'User not found in the database. Please check your email or Sign Up.' };
     }
 
     const hashedInput = hashPasswordLocal(password);
-    const isDemoAccount = DEMO_EMAILS.has(queryEmail);
-    const isValidPassword =
-      user.passwordHash === hashedInput ||
-      user.passwordHash === password ||
-      (isDemoAccount && (password === 'forensics1234' || password === 'numl1234'));
+    const isValidPassword = user.passwordHash === hashedInput;
 
     if (!isValidPassword) {
       return { success: false, error: 'Invalid credentials. Please verify your password.' };

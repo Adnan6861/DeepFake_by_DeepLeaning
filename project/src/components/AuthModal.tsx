@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LogIn, UserPlus, Database, AlertCircle, CheckCircle2, Eye, EyeOff, X, ShieldCheck } from 'lucide-react';
+import { LogIn, UserPlus, AlertCircle, CheckCircle2, Eye, EyeOff, X, ShieldCheck } from 'lucide-react';
 import { DatabaseService } from '../services/db';
 import { User } from '../types';
 import { Logo } from './Logo';
@@ -113,28 +113,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
     } catch (err: any) {
       setError(err?.message || 'A network error occurred. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickLogin = async (demoEmail: string, demoRole: string) => {
-    setError(null);
-    setSuccessMsg(null);
-    setEmail(demoEmail);
-    setPassword('numl1234');
-    setLoading(true);
-    try {
-      const res = await DatabaseService.loginUser(demoEmail, 'numl1234');
-      if (res.success && res.user) {
-        setSuccessMsg(`Logged in as ${res.user.name} (${demoRole})`);
-        setTimeout(() => {
-          onSuccess(res.user!);
-          onClose();
-        }, 400);
-      } else {
-        setError(res.error || 'Demo login failed.');
-      }
     } finally {
       setLoading(false);
     }
@@ -344,61 +322,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
           </div>
         </form>
-
-        {/* 1-Click Database Demo Accounts */}
-        <div className="mt-5 pt-4 border-t border-slate-800">
-          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2 flex items-center justify-between">
-            <span className="flex items-center space-x-1.5">
-              <Database className="w-3 h-3 text-indigo-400" />
-              <span>1-Click Verified Demo Accounts:</span>
-            </span>
-            <span className="text-[10px] text-slate-500 font-mono">Instant Access</span>
-          </p>
-
-          <div className="space-y-1.5">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('adnannawazk080@gmail.com', 'Lead Engineer')}
-              className="w-full text-left px-3 py-2 rounded-xl bg-slate-950/90 hover:bg-slate-800 border border-slate-800/90 hover:border-slate-700 text-slate-300 flex items-center justify-between text-[11px] transition-all group"
-            >
-              <div>
-                <span className="font-semibold text-white block group-hover:text-indigo-300 transition-colors">Muhammad Adnan</span>
-                <span className="text-[10px] text-slate-400 font-mono">adnannawazk080@gmail.com</span>
-              </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-950/70 text-indigo-300 border border-indigo-800/50">
-                Lead
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('kainat.zahra@forensics.ai', 'Supervisor')}
-              className="w-full text-left px-3 py-2 rounded-xl bg-slate-950/90 hover:bg-slate-800 border border-slate-800/90 hover:border-slate-700 text-slate-300 flex items-center justify-between text-[11px] transition-all group"
-            >
-              <div>
-                <span className="font-semibold text-white block group-hover:text-teal-300 transition-colors">Syeda Kainat Zahra</span>
-                <span className="text-[10px] text-slate-400 font-mono">kainat.zahra@forensics.ai</span>
-              </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-teal-950/70 text-teal-300 border border-teal-800/50">
-                Supervisor
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('hadia.noor@forensics.ai', 'Student')}
-              className="w-full text-left px-3 py-2 rounded-xl bg-slate-950/90 hover:bg-slate-800 border border-slate-800/90 hover:border-slate-700 text-slate-300 flex items-center justify-between text-[11px] transition-all group"
-            >
-              <div>
-                <span className="font-semibold text-white block group-hover:text-amber-300 transition-colors">Hadia Noor</span>
-                <span className="text-[10px] text-slate-400 font-mono">hadia.noor@forensics.ai</span>
-              </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-950/70 text-amber-300 border border-amber-800/50">
-                Researcher
-              </span>
-            </button>
-          </div>
-        </div>
 
       </div>
     </div>
