@@ -1,0 +1,8 @@
+{
+  "name": "Remix Deepfake Detective - AI-Powered Video Manipulation Analysis",
+  "description": "AI-powered deepfake detection system with YOLOv12 face localization, EfficientNet-B4 attention classifier, and Grad-CAM visual heatmaps.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
