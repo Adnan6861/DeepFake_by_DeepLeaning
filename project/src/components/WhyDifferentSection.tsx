@@ -17,7 +17,7 @@ export const WhyDifferentSection: React.FC = () => {
       title: 'YOLOv12 + EfficientNet Speed & Accuracy',
       tag: 'Hybrid Architecture',
       description:
-        'Synergizes ultra-fast YOLOv12 facial localization with an EfficientNet-B4 CNN backbone enhanced by a Channel Attention Module to maximize biological feature sensitivity while suppressing background noise.',
+        'Synergizes ultra-fast YOLOv12 facial localization with an EfficientNet-B0 CNN backbone enhanced by a Channel Attention Module to maximize biological feature sensitivity while suppressing background noise.',
       bulletPoints: ['High throughput 1.8s inference', 'Multi-scale boundary alignment', '≥80% benchmark target accuracy'],
       icon: <Zap className="w-6 h-6 text-indigo-300" />,
       circleColor: 'bg-indigo-950/80 border border-indigo-500/50 shadow-indigo-950/50',
