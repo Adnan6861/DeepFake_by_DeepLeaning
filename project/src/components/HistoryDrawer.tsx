@@ -87,7 +87,9 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
 
                   <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
                     <span>{new Date(item.analyzedAt).toLocaleDateString()}</span>
-                    <span>{item.totalFrames} frames • {item.processingTimeSec}s</span>
+                    <span>
+                      {item.totalFrames === 1 ? '1 frame (Image)' : `${item.totalFrames} frames`} • {item.processingTimeSec}s
+                    </span>
                   </div>
                 </div>
               );
